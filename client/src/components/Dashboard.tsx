@@ -31,20 +31,35 @@ export default function Dashboard() {
     const payloads = await Promise.all(
       acceptedFiles.map(async (file) => {
         const text = await file.text();
-        // Sanitize path: Windows backslashes \ and excessive slashes break GitHub API //
-        const relativePath = ((file as any).path || file.name).replace(/\\/g, '/');
-        const cleanPath = relativePath.replace(/^\/+/, ''); 
+        // (file as any).path is set by react-dropzone when dropping a FOLDER
+        // For individual files, it may be undefined or just "/filename" — fall back to file.name
+        const rawPath: string = (file as any).path || (file as any).relativePath || file.name || '';
+        // Normalize: replace backslashes, strip leading ./ and /, collapse double slashes
+        const cleanPath = rawPath
+          .replace(/\\/g, '/')       // Windows backslashes → forward slash
+          .replace(/^(\.?\/)+/, '')  // strip leading ./ or / (react-dropzone adds ./ for individual files)
+          .replace(/\/+/g, '/');     // collapse double slashes
 
         return {
-          path: cleanPath,
+          path: cleanPath || file.name,  // final fallback to file.name
           content: text
         };
       })
     );
-    setFilesPayload(payloads);
+    // Append to existing staged files instead of replacing
+    setFilesPayload(prev => {
+      const existingPaths = new Set(prev.map(f => f.path));
+      const newFiles = payloads.filter(f => !existingPaths.has(f.path));
+      return [...prev, ...newFiles];
+    });
   };
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    multiple: true,
+    // Allow both files and folder drops
+    useFsAccessApi: false,
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,11 +72,27 @@ export default function Dashboard() {
 
     // Apply targetPath dynamically at submission time
     const finalFilesPayload = filesPayload.map(file => {
-      let finalPath = file.path;
+      let finalPath = file.path
+        .replace(/\\/g, '/')
+        .replace(/^(\.?\/)+/, '')  // strip leading ./ or /
+        .replace(/\/+/g, '/');
+
       if (targetPath) {
-        const sanitizedPrefix = targetPath.replace(/\\/g, '/');
-        finalPath = `${sanitizedPrefix}/${finalPath}`.replace(/\/+/g, '/').replace(/^\/+/, '');
+        const sanitizedPrefix = targetPath
+          .replace(/\\/g, '/')
+          .replace(/^\/+/, '')
+          .replace(/\/+$/, '')   // strip trailing slash from prefix
+          .replace(/\/+/g, '/');
+        finalPath = `${sanitizedPrefix}/${finalPath}`
+          .replace(/\/+/g, '/')
+          .replace(/^\/+/, '');
       }
+
+      // Guard: path must not be empty or just slashes
+      if (!finalPath || finalPath === '/') {
+        finalPath = file.path || 'unknown_file';
+      }
+
       return { ...file, path: finalPath };
     });
 
@@ -157,12 +188,17 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div {...getRootProps()} className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-colors ${isDragActive ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-zinc-300 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-700'}`}>
-            <input {...getInputProps()} />
+          <div
+            {...getRootProps()}
+            className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-colors ${isDragActive ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-zinc-300 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-700'}`}
+          >
+            {/* Standard multi-file input (click to browse) */}
+            <input {...getInputProps()} multiple />
             <Upload className="mx-auto h-8 w-8 text-zinc-400 mb-4" />
-            <p className="text-zinc-600 dark:text-zinc-400">
-              Drag & drop files here, or click to select files.
+            <p className="text-zinc-600 dark:text-zinc-400 font-medium">
+              Drag &amp; drop files <span className="text-zinc-400">or</span> folders here
             </p>
+            <p className="text-xs text-zinc-400 mt-1">or click to select individual files</p>
           </div>
 
           {filesPayload.length > 0 && (
