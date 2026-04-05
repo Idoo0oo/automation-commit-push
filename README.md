@@ -1,6 +1,6 @@
-# 🚀 Setup Automation Dashboard
+# 🚀 Setup Automation Dashboard (Vite + Express)
 
-Sistem ini adalah web dashboard (lokal) yang digunakan untuk *automating GitHub commits*. Ikuti langkah-langkah di bawah ini untuk menjalankannya di laptop kamu.
+Sistem ini adalah web dashboard (lokal) yang digunakan untuk *automating GitHub commits*. Aplikasi ini sekarang menggunakan arsitektur **NPM Workspaces** yang memisahkan frontend (Vite + React) dan backend (Node.js + Express).
 
 ## 📋 Persyaratan Sistem
 Sebelum mulai, pastikan kamu sudah menginstal:
@@ -17,32 +17,43 @@ Sebelum mulai, pastikan kamu sudah menginstal:
 3. Buat database baru bernama `ukk_autocommit` di phpMyAdmin (`http://localhost/phpmyadmin`) jika kamu menggunakan nama default.
 
 ### 2️⃣ Siapkan File Konfigurasi (.env)
-File konfigurasi digunakan supaya aplikasi ini tahu cara menyambung ke database kamu.
-1. Di dalam folder utama project ini, cari file bernama `.env.example`.
-2. Ganti nama file tersebut (Rename) menjadi `.env` (pastikan tidak ada kata .example lagi).
-3. Jika XAMPP kamu menggunakan password untuk root, buka file `.env` dengan Notepad/VS Code dan masukkan passwordnya.
+File konfigurasi digunakan supaya backend tahu cara menyambung ke database kamu.
+1. Masuk ke dalam folder `server/` dan cari file bernama `.env.example`.
+2. Duplikat/Ganti nama file tersebut menjadi `.env` (pastikan tidak ada kata .example lagi).
+3. Jika XAMPP kamu menggunakan password untuk root, buka file `.env` tersebut dan masukkan passwordnya.
    *(Default XAMPP biasanya **tanpa password**, jadi URL `mysql://root:@localhost:3306/ukk_autocommit` biasanya sudah bisa langsung jalan).*
 
 ### 3️⃣ Install Dependencies & Sinkronisasi Database
 Sekarang kita perlu mendownload package web-nya dan mencocokkan struktur database:
-1. Buka **Terminal** (atau Command Prompt / PowerShell) dan arahkan ke folder ini.
-2. Jalankan perintah berikut untuk menginstall library yang dibutuhkan:
+1. Buka **Terminal** (atau Command Prompt / PowerShell) di **folder UTAMA (root)** project ini.
+2. Jalankan perintah berikut untuk menginstall seluruh library (Front-End & Back-End otomatis):
    ```bash
    npm install
    ```
-3. Setelah selesai, jalankan perintah ini agar tabel di file database kita otomatis terbentuk:
+3. Setelah selesai, masuk ke dalam folder server dan jalankan perintah db push:
    ```bash
+   cd server
    npx prisma db push
+   cd ..
    ```
 
 ### 4️⃣ Jalankan Aplikasi!
-Semua sudah siap. Untuk menyalakan server lokal, jalankan:
+Karena aplikasi ini terbagi menjadi dua bagian (Client dan Server), kamu perlu menjalankan keduanya:
+
+Buka **Dua Terminal Baru** di folder utama project ini:
+
+**Terminal 1 (Backend Server):**
 ```bash
-npm run dev
+npm run dev:server
 ```
 
-Buka browser kamu dan akses alamat:
-👉 **[http://localhost:3000](http://localhost:3000)**
+**Terminal 2 (Frontend UI):**
+```bash
+npm run dev:client
+```
+
+Buka browser kamu dan akses alamat Frontend Vite:
+👉 **[http://localhost:5173](http://localhost:5173)**
 
 ---
-*Catatan: Setiap kali kamu ingin menggunakan aplikasi ini kedepannya, kamu hanya perlu menyalakan **MySQL di XAMPP**, buka terminal di folder ini, dan jalankan `npm run dev`.*
+*Catatan: Setiap kali kamu ingin menggunakan aplikasi ini kedepannya, kamu hanya perlu memastikan **MySQL di XAMPP hidup**, lalu buka dua terminal di folder ini untuk menjalankan `npm run dev:server` dan `npm run dev:client`.*
