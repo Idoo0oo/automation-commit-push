@@ -55,5 +55,18 @@ npm run dev:client
 Buka browser kamu dan akses alamat Frontend Vite:
 👉 **[http://localhost:5173](http://localhost:5173)**
 
+### 🔑 Cara Mendapatkan GitHub Personal Access Token (PAT)
+Aplikasi ini membutuhkan Token dari GitHub untuk melakukan commit otomatis ke repository kamu.
+1. Login ke akun GitHub kamu.
+2. Buka halaman **Settings** -> **Developer Settings** -> **Personal access tokens** -> **Tokens (classic)**.
+   👉 *Jalan pintas: klik [https://github.com/settings/tokens](https://github.com/settings/tokens)*
+3. Klik tombol **Generate new token** -> **Generate new token (classic)**.
+4. Pada bagian **Note**, beri nama token (misalnya "UKK Auto Commit Token").
+5. Pada bagian **Expiration**, pilih durasi sesuai kebutuhan (disarankan 30 days atau selama waktu ujian berlangsung).
+6. Pada bagian **Select scopes**, wajib centang kotak **`repo`** (Full control of private repositories).
+7. Scroll paling bawah dan klik tombol **Generate token**.
+8. **Copy token yang muncul (biasanya berawalan `ghp_...`).** *(Awas! Token ini hanya akan diperlihatkan satu kali, simpan baik-baik di notepad / tempat rahasia!)*
+9. Masukkan/Paste token tersebut pada kolom yang disediakan di halaman aplikasi web ini.
+
 ---
 *Catatan: Setiap kali kamu ingin menggunakan aplikasi ini kedepannya, kamu hanya perlu memastikan **MySQL di XAMPP hidup**, lalu buka dua terminal di folder ini untuk menjalankan `npm run dev:server` dan `npm run dev:client`.*
