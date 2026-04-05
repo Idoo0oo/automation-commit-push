@@ -1,0 +1,20 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model ScheduledCommit {
+  id            Int      @id @default(autoincrement())
+  repoOwner     String
+  repoName      String
+  commitMessage String
+  scheduledTime DateTime
+  patToken      String   @db.Text
+  filesPayload  String   @db.LongText
+  status        String   @default("PENDING")
+  createdAt     DateTime @default(now())
+}
